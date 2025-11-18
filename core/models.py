@@ -96,6 +96,8 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # to get the revenue of this order we also have to calculate it from the order items
+
     @property
     def name(self):
         return self.first_name + ' ' + self.last_name
