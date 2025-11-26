@@ -5,9 +5,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from administrator.serializers import ProductSerializer, LinkSerializer, OrderSerializer
+from administrator.services import ProductService
 from common.authentication import JWTAuthentication
 from common.serializers import UserSerializer
 from core.models import User, Product, Link, Order
+from django.core.cache import cache
 
 
 class AmbassadorAPIView(APIView):
@@ -35,13 +37,19 @@ class ProductGenericAPIView(
         return self.list(request)
 
     def post(self, request):
-        return  self.create(request)
+        response = self.create(request)
+        ProductService.clear_cache()
+        return response
 
     def put(self, request, pk=None):
-        return self.partial_update(request, pk)
+        response = self.partial_update(request, pk)
+        ProductService.clear_cache()
+        return response
 
     def delete(self, request, pk=None):
-        return self.destroy(request, pk)
+        response = self.destroy(request, pk)
+        ProductService.clear_cache()
+        return response
 
 class LinkAPIView(APIView):
     authentication_classes = [JWTAuthentication]
