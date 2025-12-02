@@ -1,4 +1,7 @@
-from core.models import Product
+from core.models import Product, Link
+
+import random, string
+
 
 
 class ProductService:
@@ -43,3 +46,17 @@ class ProductService:
     @staticmethod
     def get_product_by_id(product_id):
         return Product.objects.get(id=product_id)
+
+class LinkService:
+    @staticmethod
+    def generate_code():
+        while True:
+            code = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+            if not Link.objects.filter(code=code).exists():
+                return code
+    @staticmethod
+    def create_link(user, products):
+        code = LinkService.generate_code()
+        link = Link.objects.create(code=code, user=user)
+        link.products.set(products)
+        return link

@@ -1,4 +1,5 @@
 from rest_framework import serializers
+import random, string
 
 from core.models import Product, Link
 
@@ -17,3 +18,14 @@ class ProductSerializer(serializers.Serializer):
 
     #  Serializer Only Validates & Transforms Data
     #  Business logic handled in service layer
+
+class LinkSerializer(serializers.Serializer):
+    products = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(),
+        many=True,
+    )
+
+    def validate_products(self, value):
+        if not value:
+            raise serializers.ValidationError("At least one product must be selected.")
+        return value

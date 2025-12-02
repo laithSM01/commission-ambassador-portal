@@ -2,14 +2,19 @@ import time
 
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from django_redis import get_redis_connection
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
-from ambassador.serializer import ProductSerializer
-from ambassador.services import ProductService
+from ambassador.serializer import ProductSerializer, LinkSerializer
+from ambassador.services import ProductService, LinkService
 from ambassador.pagination import ProductPagination
 from django.core.cache import cache
+
+from common.authentication import JWTAuthentication
+from core.models import Link, Order
 
 
 class ProductFrontendAPIView(APIView):
@@ -66,3 +71,54 @@ class ProductBackendAPIView(APIView):
         # Fallback (should not happen with proper pagination)
         serializer = ProductSerializer(queryset, many=True)
         return Response(serializer.data)
+
+class LinkAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        serializer = LinkSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        link = LinkService.create_link(user=user, products=serializer.validated_data['products'])
+
+        return Response({
+            'code': link.code,
+            'link': link.user.id,
+            'products': [p.id for p in link.products.all()]
+        })
+
+class StatsAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        links = Link.objects.filter(user_id=user.id)
+
+        return Response([self.format(link) for link in links])
+
+    def format(self, link):
+        orders = Order.objects.filter(code=link.code, complete=1)
+
+        return {
+            'code': link.code,
+            'count': len(orders),
+            'revenue': sum(o.ambassador_revenue for o in orders)
+        }
+
+class RankingsAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        con = get_redis_connection("default")
+
+        # zrevrangebyscore this helps us sort desc
+        rankings = con.zrevrangebyscore('rankings', min=0, max=10000, withscores=True)
+
+        return Response({
+            r[0].decode("utf-8"): r[1] for r in rankings
+        })
