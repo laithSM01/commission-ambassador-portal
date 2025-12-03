@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'core',
     'administrator',
     'common',
-    'ambassador'
+    'ambassador',
+    'checkout'
 ]
 
 MIDDLEWARE = [
