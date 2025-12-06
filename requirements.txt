@@ -5,3 +5,4 @@ psycopg2
 pyJWT==2.0.1
 Faker==6.6.1
 django-redis == 4.12.1
+paypalrestsdk==1.13.1

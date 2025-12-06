@@ -6,6 +6,11 @@ services:
     ports:
       - 8000:8000
       - 8001:8001
+    env_file:
+      - .env
+    environment:
+      - PAYPAL_CLIENT_ID=${PAYPAL_CLIENT_ID}
+      - PAYPAL_CLIENT_SECRET=${PAYPAL_CLIENT_SECRET}
     depends_on:
       db:
         condition: service_healthy

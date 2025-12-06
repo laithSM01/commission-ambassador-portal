@@ -19,6 +19,8 @@ media/
 
 # Environment variables
 .env
+*.env
+.env
 .env.local
 .env.production
 

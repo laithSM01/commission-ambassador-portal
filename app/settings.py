@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,6 +28,14 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+
+# PayPal Configuration
+PAYPAL_MODE = os.getenv('PAYPAL_MODE', 'sandbox')
+PAYPAL_CLIENT_ID = os.getenv('PAYPAL_CLIENT_ID')
+PAYPAL_CLIENT_SECRET = os.getenv('PAYPAL_CLIENT_SECRET')
+PAYPAL_SUCCESS_URL = os.getenv('PAYPAL_SUCCESS_URL', 'http://localhost:5000/success')
+PAYPAL_CANCEL_URL = os.getenv('PAYPAL_CANCEL_URL', 'http://localhost:5000/error')
+PAYPAL_CURRENCY = os.getenv('PAYPAL_CURRENCY', 'USD')
 
 # Application definition
 
