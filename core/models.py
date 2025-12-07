@@ -85,6 +85,7 @@ class Order(models.Model):
     code = models.CharField(max_length=255)
     ambassador_email = models.CharField(max_length=255)
     #data about customer who bought the product firstname, lastname, email..
+    #data about customer who bought the product firstname, lastname, email..
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     email = models.CharField(max_length=255)
@@ -107,10 +108,10 @@ class Order(models.Model):
         items = OrderItem.objects.filter(order_id=self.pk)
         return sum(i.ambassador_revenue for i in items)
 
-    # @property
-    # def admin_revenue(self):
-    #     items = OrderItem.objects.filter(order_id=self.pk)
-    #     return sum(i.admin_revenue for i in items)
+    @property
+    def admin_revenue(self):
+        items = OrderItem.objects.filter(order_id=self.pk)
+        return sum(i.admin_revenue for i in items)
 
 class OrderItem(models.Model):
     # related_name order_item is how we want it to be referenced from order model in the api

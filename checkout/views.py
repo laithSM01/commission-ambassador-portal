@@ -9,6 +9,8 @@ from core.models import Order, Product, OrderItem, Link
 from .serializers import CheckoutLinkSerializer
 from .services import CheckoutService
 
+from django.core.mail import send_mail
+
 
 class LinkAPIView(APIView):
 
@@ -53,3 +55,31 @@ class OrderApiView(APIView):
             return Response({
                 'error': 'An error occurred while processing your order'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class OrderConfirmAPIView(APIView):
+    def post(self, request):
+        order = Order.objects.filter(transaction_id=request.data['source']).first()
+        if not order:
+            raise exceptions.APIException('Order not found!')
+
+        order.complete = 1
+        order.save()
+
+        # Admin Email
+        send_mail(
+            subject='An Order has been completed',
+            message='Order #' + str(order.id) + 'with a total of $' + str(order.admin_revenue) + ' has been completed!',
+            from_email='from@email.com',
+            recipient_list=['admin@admin.com']
+        )
+
+        send_mail(
+            subject='An Order has been completed',
+            message='You earned $' + str(order.ambassador_revenue) + ' from the link #' + order.code,
+            from_email='from@email.com',
+            recipient_list=[order.ambassador_email]
+        )
+
+        return Response({
+            'message': 'success'
+        })
